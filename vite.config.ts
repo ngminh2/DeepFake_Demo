@@ -11,7 +11,7 @@ export default ({ mode }: ConfigEnv): UserConfig => {
   const root = process.cwd()
   const env = loadEnv(mode, root)
   return {
-    base: 'DeepFake_Demo',
+    base: '/DeepFake_Demo/',
     server: {
       allowedHosts: ['*'],
       host: env.VITE_HOST,
