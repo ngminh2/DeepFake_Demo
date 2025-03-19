@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/DeepFake_Demo/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>deepfake-webrtc-demo</title>
+    <meta name="description" content="Opinionated Vite Starter Template">
+    <script type="module" crossorigin src="/DeepFake_Demo/assets/index-9yDc5WOB.js"></script>
+    <link rel="stylesheet" crossorigin href="/DeepFake_Demo/assets/index-DOmt0Beo.css">
+  </head>
+  <body class="font-sans dark:text-white dark:bg-hex-121212">
+    <div id="app"></div>
+    <script>
+      (function () {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        const setting = localStorage.getItem('color-schema') || 'auto'
+        if (setting === 'dark' || (prefersDark && setting !== 'light'))
+          document.documentElement.classList.toggle('dark', true)
+      })()
+    </script>
+  </body>
+</html>
