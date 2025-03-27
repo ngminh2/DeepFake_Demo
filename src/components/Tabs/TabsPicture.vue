@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { useFileSystemAccess } from '@vueuse/core'
 import { globalActiveKey } from '~/composables'
+import { defineProps } from 'vue'
 
+const props = defineProps<{ model: string, parameters: Record<string, any> }>()
 const canvasRef = ref()
 const imageRef = ref()
 const dataType = ref('Blob') as Ref<'Text' | 'ArrayBuffer' | 'Blob'>
@@ -29,8 +31,11 @@ watch(() => globalActiveKey.value, () => {
   imageUrl.value = ''
 })
 function onImageLoadDetect() {
-  //
-  detect(imageRef.value, canvasRef.value)
+  if (props.model === 'Deep Face Anti-Spoofing') {
+    detectFAS(imageRef.value, canvasRef.value, props.parameters)
+  } else if (props.model === 'DeepFake Segmentation') {
+    // detect2(imageRef.value, canvasRef.value);
+  }  
 }
 </script>
 

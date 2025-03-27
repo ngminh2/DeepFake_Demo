@@ -1,69 +1,95 @@
 import labels from './labels.json'
 
-/**
- * Render prediction boxes
- * @param {HTMLCanvasElement} canvasRef canvas tag reference
- * @param {Array} boxes_data boxes array
- * @param {Array} scores_data scores array
- * @param {Array} classes_data class array
- */
-export function renderBoxes(canvasRef: HTMLCanvasElement, boxes_data: Float32Array | Int32Array | Uint8Array, scores_data: Float32Array | Int32Array | Uint8Array, classes_data: Float32Array | Int32Array | Uint8Array) {
+export function renderBoxes(
+  canvasRef: HTMLCanvasElement,
+  boxes_data: Float32Array | Int32Array | Uint8Array,
+  scores_data: Float32Array | Int32Array | Uint8Array,
+  classes_data: Float32Array | Int32Array | Uint8Array,
+  fasArray: string[]
+) {
   const ctx = canvasRef.getContext('2d')
-  if (ctx) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) // clean canvas
+  if (!ctx) return
 
-    const colors = new Colors()
+  const offscreenCanvas = document.createElement("canvas")
+  offscreenCanvas.width = canvasRef.width
+  offscreenCanvas.height = canvasRef.height
+  const offscreenCtx = offscreenCanvas.getContext("2d")
+  if (!offscreenCtx) return
 
-    // font configs
-    const font = `${Math.max(
-      Math.round(Math.max(ctx.canvas.width, ctx.canvas.height) / 40),
-      14,
-    )}px Arial`
-    ctx.font = font
-    ctx.textBaseline = 'top'
+  const colors = new Colors()
 
-    for (let i = 0; i < scores_data.length; ++i) {
-      // filter based on class threshold
-      const klass = labels[classes_data[i]]
-      const color = colors.get(classes_data[i])
-      const score = (scores_data[i] * 100).toFixed(1)
+  for (let i = 0; i < scores_data.length; ++i) {
+    const klass = labels[classes_data[i]]
+    const color = colors.get(classes_data[i])
+    const score = (scores_data[i] * 100).toFixed(0)
+    const fas = fasArray[i]
 
-      let [y1, x1, y2, x2] = boxes_data.slice(i * 4, (i + 1) * 4)
-      const width = x2 - x1
-      const height = y2 - y1
+    let [y1, x1, y2, x2] = boxes_data.slice(i * 4, (i + 1) * 4)
+    const width = x2 - x1
+    const height = y2 - y1
 
-      // draw box.
-      ctx.fillStyle = Colors.hexToRgba(color, 0.2)!
-      ctx.fillRect(x1, y1, width, height)
+    offscreenCtx.fillStyle = Colors.hexToRgba(color, 0.15)!
+    offscreenCtx.fillRect(x1, y1, width, height)
 
-      // draw border box.
-      ctx.strokeStyle = color
-      ctx.lineWidth = Math.max(Math.min(ctx.canvas.width, ctx.canvas.height) / 200, 2.5)
-      ctx.strokeRect(x1, y1, width, height)
+    const gradient = offscreenCtx.createLinearGradient(x1, y1, x2, y2)
+    gradient.addColorStop(0, color)
+    gradient.addColorStop(1, Colors.hexToRgba(color, 0.6)!)
+    offscreenCtx.strokeStyle = gradient
 
-      // Draw the label background.
-      ctx.fillStyle = color
-      const textWidth = ctx.measureText(`${klass} - ${score}%`).width
-      const textHeight = parseInt(font, 10) // base 10
-      const yText = y1 - (textHeight + ctx.lineWidth)
-      ctx.fillRect(
-        x1 - 1,
-        yText < 0 ? 0 : yText, // handle overflow label box
-        textWidth + ctx.lineWidth,
-        textHeight + ctx.lineWidth,
-      )
+    offscreenCtx.lineWidth = 2.5
+    offscreenCtx.setLineDash([8, 4])
+    offscreenCtx.shadowBlur = 10
+    offscreenCtx.shadowColor = color
+    offscreenCtx.strokeRect(x1, y1, width, height)
+    offscreenCtx.shadowBlur = 0
 
-      // Draw labels
-      ctx.fillStyle = '#ffffff'
-      ctx.fillText(`${klass} - ${score}%`, x1 - 1, yText < 0 ? 0 : yText)
-    }
+    drawDottedCorners(offscreenCtx, x1, y1, x2, y2, color)
+
+    let fontSize = Math.max(Math.round(offscreenCanvas.width / 50), 14)
+    offscreenCtx.font = `bold ${fontSize}px Arial`
+    offscreenCtx.textBaseline = 'middle'
+    offscreenCtx.fillStyle = "red"
+
+    let text = `${klass} ${score}% ${fas}`
+    let textWidth = offscreenCtx.measureText(text).width
+
+    const textX = x1 + width / 2 - textWidth / 2 
+    const textY = y1 - fontSize - 5
+    offscreenCtx.fillText(text, textX, textY)
   }
+
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+  ctx.drawImage(offscreenCanvas, 0, 0)
+}
+
+function drawDottedCorners(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, color: string) {
+  ctx.strokeStyle = color
+  ctx.lineWidth = 2
+  ctx.setLineDash([4, 2])
+
+  ctx.beginPath()
+  ctx.moveTo(x1, y1 + 12)
+  ctx.lineTo(x1, y1)
+  ctx.lineTo(x1 + 12, y1)
+
+  ctx.moveTo(x2 - 12, y1)
+  ctx.lineTo(x2, y1)
+  ctx.lineTo(x2, y1 + 12)
+
+  ctx.moveTo(x1, y2 - 12)
+  ctx.lineTo(x1, y2)
+  ctx.lineTo(x1 + 12, y2)
+
+  ctx.moveTo(x2 - 12, y2)
+  ctx.lineTo(x2, y2)
+  ctx.lineTo(x2, y2 - 12)
+
+  ctx.stroke()
 }
 
 class Colors {
   palette: string[]
   n: number
-  // ultralytics color palette https://ultralytics.com/
   constructor() {
     this.palette = [
       '#FF3838',
@@ -100,4 +126,37 @@ class Colors {
         )}, ${alpha})`
       : null
   }
+}
+
+export function renderDetections(detections: any[], canvasRef: HTMLCanvasElement) {
+  const src_width = canvasRef.width
+  const src_height = canvasRef.height
+  const boxesArray = new Float32Array(detections.length * 4)
+  const scoresArray = new Float32Array(detections.length)
+  const classesArray = new Int32Array(detections.length)
+  const fasArray: string[] = new Array(detections.length)
+
+  detections.forEach((detection, i) => {
+    const x = parseFloat(detection.x)
+    const y = parseFloat(detection.y)
+    const w = parseFloat(detection.w)
+    const h = parseFloat(detection.h)
+    const real = parseFloat(detection.real)
+    const fake = parseFloat(detection.fake)
+
+    const fas: string = real > fake ? `(real ${Math.round(real * 100)}%)` : `(fake ${Math.round(fake * 100)}%)`
+
+    const x1 = (x - w / 2) * src_width
+    const y1 = (y - h / 2) * src_height
+    const x2 = (x + w / 2) * src_width
+    const y2 = (y + h / 2) * src_height
+
+    boxesArray.set([y1, x1, y2, x2], i * 4)
+    scoresArray[i] = parseFloat(detection.prob)
+    const classIndex = labels.indexOf(detection.class)
+    classesArray[i] = classIndex !== -1 ? classIndex : -1
+    fasArray[i] = fas
+  })
+
+  renderBoxes(canvasRef, boxesArray, scoresArray, classesArray, fasArray)
 }

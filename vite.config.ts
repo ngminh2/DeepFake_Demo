@@ -11,17 +11,12 @@ export default ({ mode }: ConfigEnv): UserConfig => {
   const root = process.cwd()
   const env = loadEnv(mode, root)
   return {
-    base: '/DeepFake_Demo/',
+    base: '/',
     server: {
       allowedHosts: ['*'],
       host: env.VITE_HOST,
       port: +env.VITE_PORT,
       strictPort: true,
-      hmr: {
-        protocol: 'wss', 
-        host: '*', 
-        clientPort: 3333,
-      },
       watch: {
         usePolling: true, 
       },

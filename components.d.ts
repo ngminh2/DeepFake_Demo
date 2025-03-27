@@ -7,8 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    FullScreenBtn: typeof import('./src/components/FullScreenBtn.vue')['default']
-    Hello: typeof import('./src/components/Hello.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TabsPicture: typeof import('./src/components/Tabs/TabsPicture.vue')['default']
