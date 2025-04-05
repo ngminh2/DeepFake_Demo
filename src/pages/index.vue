@@ -13,12 +13,11 @@ const modelConfigs = ref({
     accuracyThreshold: { label: 'Accuracy Threshold', value: 0, type: 'slider', min: 0, max: 1, step: 0.01 },
     confidenceFaceThreshold: { label: "Confidence's Face Threshold", value: 0.25, type: 'slider', min: 0, max: 1, step: 0.01 },
     iouThreshold: { label: 'IoU Threshold', value: 0.7, type: 'slider', min: 0, max: 1, step: 0.01 },
-    maxDetections: { label: 'Max-Detections', value: 300, type: 'slider', min: 1, max: 1000, step: 10 }
+    maxDetections: { label: 'Maximum Detections', value: 300, type: 'slider', min: 1, max: 1000, step: 10 }
   },
   'DeepFake Segmentation': {
-    segmentationThreshold: { label: 'Segmentation Threshold', value: 0.5, type: 'slider', min: 0, max: 1, step: 0.1 },
-    maskSize: { label: 'Mask Size', value: 100, type: 'slider', min: 0, max: 500, step: 10 },
-    blurLevel: { label: 'Blur Level', value: 300, type: 'slider', min: 0, max: 500, step: 10 }
+    inpSize: { label: 'Model Input Image Size', value: 512, type: 'slider', min: 2, max: 512, step: 1 },
+    alphaBlend: { label: 'Alpha Blending Factor', value: 0.7, type: 'slider', min: 0, max: 1, step: 0.01 }
   }
 });
 
@@ -48,7 +47,7 @@ const mainContentStyle = computed(() => {
 </script>
 
 <template>
-  <div class="relative flex h-screen dark:bg-gray-900">
+  <div class="relative flex min-h-screen h-auto overflow-auto dark:bg-gray-900">
     <div class="flex-1 transition-all" :style="mainContentStyle">
       <a-typography>
         <a-typography-title class="main-title dark:text-white">Deepfake Demo</a-typography-title>
@@ -74,7 +73,7 @@ const mainContentStyle = computed(() => {
           <span class="chevron">{{ isConfigOpen ? '❯' : '❮' }}</span>
         </div>
         <div v-if="isConfigOpen" class="config-content">
-          <h1 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white mt-16">Settings</h1>
+          <h1 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white mt-6">Settings</h1>
 
           <div class="config-item">
             <label class="config-label dark:text-white">Select Model</label>
@@ -93,7 +92,6 @@ const mainContentStyle = computed(() => {
             <a-input-number v-if="param.type === 'input-number'" v-model="param.value" :min="param.min" :max="param.max"
               class="w-full dark:bg-gray-700 dark:text-white" />
           </div>
-          
 
           <div class="config-item-custom flex items-center justify-center">
             <button class="icon-btn" @click="toggleDark()">
@@ -118,6 +116,16 @@ const mainContentStyle = computed(() => {
   max-width: 100%;
   overflow-x: auto;
   padding: 0 10px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.flex-1 {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .config-panel {
@@ -217,7 +225,7 @@ const mainContentStyle = computed(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .icon-btn div {

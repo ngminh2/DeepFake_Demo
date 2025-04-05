@@ -37,6 +37,8 @@ declare global {
   const debouncedWatch: typeof import('@vueuse/core')['debouncedWatch']
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
   const defineComponent: typeof import('vue')['defineComponent']
+  const detectDF: typeof import('./src/composables/detect')['detectDF']
+  const detectDFonVideo: typeof import('./src/composables/detect')['detectDFonVideo']
   const detectFAS: typeof import('./src/composables/detect')['detectFAS']
   const detectFASonVideo: typeof import('./src/composables/detect')['detectFASonVideo']
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
@@ -357,6 +359,8 @@ declare module 'vue' {
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
+    readonly detectDF: UnwrapRef<typeof import('./src/composables/detect')['detectDF']>
+    readonly detectDFonVideo: UnwrapRef<typeof import('./src/composables/detect')['detectDFonVideo']>
     readonly detectFAS: UnwrapRef<typeof import('./src/composables/detect')['detectFAS']>
     readonly detectFASonVideo: UnwrapRef<typeof import('./src/composables/detect')['detectFASonVideo']>
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>

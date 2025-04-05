@@ -1,3 +1,4 @@
+import pako from 'pako'
 import labels from './labels.json'
 
 export function renderBoxes(
@@ -159,4 +160,34 @@ export function renderDetections(detections: any[], canvasRef: HTMLCanvasElement
   })
 
   renderBoxes(canvasRef, boxesArray, scoresArray, classesArray, fasArray)
+}
+
+export async function renderMask(result: any[], canvasRef: HTMLCanvasElement) {
+  const ctx = canvasRef.getContext('2d', { willReadFrequently: false });
+  if (!ctx || !result?.mask) return;
+
+  const byteString = atob(result.mask);
+  const len = byteString.length;
+  const byteArray = new Uint8Array(len);
+
+  for (let i = 0; i < len; ++i) {
+    byteArray[i] = byteString.charCodeAt(i);
+  }
+
+  const blob = new Blob([byteArray], { type: 'image/jpeg' });
+  const imageUrl = URL.createObjectURL(blob);
+  const img = new Image();
+
+  img.onload = () => {
+    if (canvasRef.width !== img.width || canvasRef.height !== img.height) {
+      canvasRef.width = img.width;
+      canvasRef.height = img.height;
+    } else {
+      ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
+    }
+
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(imageUrl);
+  };
+  img.src = imageUrl;
 }
