@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TabsDeepFace: typeof import('./src/components/Tabs/TabsDeepFace.vue')['default']
     TabsPicture: typeof import('./src/components/Tabs/TabsPicture.vue')['default']
     TabsVideo: typeof import('./src/components/Tabs/TabsVideo.vue')['default']
     TabsWebCam: typeof import('./src/components/Tabs/TabsWebCam.vue')['default']

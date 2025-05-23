@@ -129,6 +129,94 @@ class Colors {
   }
 }
 
+export function renderBoxesDeepFace(
+  canvasRef: HTMLCanvasElement,
+  boxes_data: Float32Array | Int32Array | Uint8Array,
+  classes_data: Float32Array | Int32Array | Uint8Array,
+) {
+  const ctx = canvasRef.getContext('2d')
+  if (!ctx) return
+
+  const offscreenCanvas = document.createElement("canvas")
+  offscreenCanvas.width = canvasRef.width
+  offscreenCanvas.height = canvasRef.height
+  const offscreenCtx = offscreenCanvas.getContext("2d")
+  if (!offscreenCtx) return
+
+  const labels_deepface = ['real', 'fake']
+
+  for (let i = 0; i < classes_data.length; ++i) {
+    const klass = labels_deepface[classes_data[i]]
+
+    let [y1, x1, y2, x2] = boxes_data.slice(i * 4, (i + 1) * 4)
+    const width = x2 - x1
+    const height = y2 - y1
+
+    let color = '#FF0000'
+    if (klass === 'real') {
+      color = '#00FF00'
+    }
+
+    offscreenCtx.fillStyle = Colors.hexToRgba(color, 0.15)!
+    offscreenCtx.fillRect(x1, y1, width, height)
+
+    const gradient = offscreenCtx.createLinearGradient(x1, y1, x2, y2)
+    gradient.addColorStop(0, color)
+    gradient.addColorStop(1, Colors.hexToRgba(color, 0.6)!)
+    offscreenCtx.strokeStyle = gradient
+
+    offscreenCtx.lineWidth = 2.5
+    offscreenCtx.setLineDash([8, 4])
+    offscreenCtx.shadowBlur = 10
+    offscreenCtx.shadowColor = color
+    offscreenCtx.strokeRect(x1, y1, width, height)
+    offscreenCtx.shadowBlur = 0
+
+    drawDottedCorners(offscreenCtx, x1, y1, x2, y2, color)
+
+    let fontSize = Math.max(Math.round(offscreenCanvas.width / 40), 18)
+    offscreenCtx.font = `bold ${fontSize}px Arial`
+    offscreenCtx.textBaseline = 'middle'
+    offscreenCtx.fillStyle = color
+
+    let text = `${klass}`
+    let textWidth = offscreenCtx.measureText(text).width
+
+    const textX = x1 + width / 2 - textWidth / 2 
+    const textY = y1 - fontSize - 5
+    offscreenCtx.fillText(text, textX, textY)
+  }
+
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+  ctx.drawImage(offscreenCanvas, 0, 0)
+}
+
+export function renderDetectionsDeepFace(detections: any[], canvasRef: HTMLCanvasElement) {
+  const src_width = canvasRef.width
+  const src_height = canvasRef.height
+  const boxesArray = new Float32Array(detections.length * 4)
+  const classesArray = new Int32Array(detections.length)
+
+  detections.forEach((detection, i) => {
+    const x = parseFloat(detection.x)
+    const y = parseFloat(detection.y)
+    const w = parseFloat(detection.w)
+    const h = parseFloat(detection.h)
+    const real = parseFloat(detection.real)
+    const fake = parseFloat(detection.fake)
+
+    const x1 = (x - w / 2) * src_width
+    const y1 = (y - h / 2) * src_height
+    const x2 = (x + w / 2) * src_width
+    const y2 = (y + h / 2) * src_height
+
+    boxesArray.set([y1, x1, y2, x2], i * 4)
+    classesArray[i] = real > fake ? 0 : 1
+  })
+
+  renderBoxesDeepFace(canvasRef, boxesArray, classesArray)
+}
+
 export function renderDetections(detections: any[], canvasRef: HTMLCanvasElement) {
   const src_width = canvasRef.width
   const src_height = canvasRef.height

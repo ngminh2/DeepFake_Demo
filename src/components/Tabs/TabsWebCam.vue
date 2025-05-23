@@ -3,6 +3,8 @@ import { globalActiveKey } from '~/composables'
 import { defineProps } from 'vue'
 import { stopDetection, closeWebSocket } from '~/composables/detect'
 
+const accuracy = ref<number | null>(null)
+const label = ref<'Real' | 'Fake' | null>(null)
 const pingRef = ref(500)
 const videoKey = ref(0)
 const props = defineProps<{ model: string, parameters: Record<string, any> }>()
@@ -60,6 +62,9 @@ function clearCanvas() {
 }
 
 function resetVideo() {
+  accuracy.value = null
+  label.value = null
+
   if (videoRef.value) {
     videoRef.value.srcObject = null
     videoRef.value.load()
@@ -87,8 +92,8 @@ watch(() => props.model, () => {
 function onVideoPlayDetect() {
   if (props.model === 'Deep Face Anti-Spoofing') {
     detectFASonVideo(videoRef.value, canvasRef.value, pingRef, props.parameters)
-  } else if (props.model === 'DeepFake Segmentation') {
-    // detect2(videoRef.value, canvasRef.value);
+  } else if (props.model === 'DeepFake') {
+    detectDFonVideo(videoRef.value, canvasRef.value, pingRef, accuracy, label, props.parameters)
   }
 }
 </script>
@@ -106,9 +111,29 @@ function onVideoPlayDetect() {
         {{ camera.label }}
       </div>
     </div>
-
     
-    <div v-if="props.model === 'DeepFake Segmentation'">
+    <div v-if="props.model === 'DeepFake'">
+      <div v-if="accuracy !== null && label !== null" class="my-4 space-y-2">
+        <div class="flex items-center justify-center space-x-3">
+          <span
+            class="px-3 py-1 rounded-full text-white text-sm font-semibold"
+            :class="label === 'Real' ? 'bg-green-600' : 'bg-red-600'"
+          >
+            {{ label }}
+          </span>
+          <span class="text-lg font-bold text-gray-900 tracking-wide">
+          Accuracy: <span class="text-primary">{{ accuracy.toFixed(2) }}%</span>
+        </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-5 overflow-hidden shadow-inner">
+          <div
+            class="h-full transition-all duration-700 ease-in-out"
+            :class="label === 'Real' ? 'bg-green-500' : 'bg-red-500'"
+            :style="{ width: accuracy + '%' }"
+          ></div>
+        </div>
+      </div>
+
       <div v-show="enabled" class="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full w-full">
         <div class="relative flex justify-center items-center h-full w-full">
           <div class="absolute top-0 left-0 bg-red-500 text-white font-bold p-2 sm:p-3 lg:p-4 flex items-center">

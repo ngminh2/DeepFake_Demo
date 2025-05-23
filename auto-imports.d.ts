@@ -38,6 +38,8 @@ declare global {
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
   const defineComponent: typeof import('vue')['defineComponent']
   const detectDF: typeof import('./src/composables/detect')['detectDF']
+  const detectDFFace: typeof import('./src/composables/detect')['detectDFFace']
+  const detectDFace: typeof import('./src/composables/detect')['detectDFace']
   const detectDFonVideo: typeof import('./src/composables/detect')['detectDFonVideo']
   const detectFAS: typeof import('./src/composables/detect')['detectFAS']
   const detectFASonVideo: typeof import('./src/composables/detect')['detectFASonVideo']
@@ -360,6 +362,7 @@ declare module 'vue' {
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly detectDF: UnwrapRef<typeof import('./src/composables/detect')['detectDF']>
+    readonly detectDFace: UnwrapRef<typeof import('./src/composables/detect')['detectDFace']>
     readonly detectDFonVideo: UnwrapRef<typeof import('./src/composables/detect')['detectDFonVideo']>
     readonly detectFAS: UnwrapRef<typeof import('./src/composables/detect')['detectFAS']>
     readonly detectFASonVideo: UnwrapRef<typeof import('./src/composables/detect')['detectFASonVideo']>

@@ -5,7 +5,7 @@ import { stopDetection, closeWebSocket } from '~/composables/detect';
 
 const isConfigOpen = ref(false);
 const selectedModel = ref('Deep Face Anti-Spoofing');
-const modelOptions = ['Deep Face Anti-Spoofing', 'DeepFake Segmentation'];
+const modelOptions = ['Deep Face Anti-Spoofing', 'DeepFake'];
 const screenWidth = ref(window.innerWidth);
 
 const modelConfigs = ref({
@@ -15,8 +15,8 @@ const modelConfigs = ref({
     iouThreshold: { label: 'IoU Threshold', value: 0.7, type: 'slider', min: 0, max: 1, step: 0.01 },
     maxDetections: { label: 'Maximum Detections', value: 300, type: 'slider', min: 1, max: 1000, step: 10 }
   },
-  'DeepFake Segmentation': {
-    inpSize: { label: 'Model Input Image Size', value: 512, type: 'slider', min: 2, max: 512, step: 1 },
+  'DeepFake': {
+    inpSize: { label: 'Model Input Image Size', value: 256, type: 'slider', min: 2, max: 512, step: 1 },
     alphaBlend: { label: 'Alpha Blending Factor', value: 0.7, type: 'slider', min: 0, max: 1, step: 0.01 }
   }
 });
@@ -50,7 +50,9 @@ const mainContentStyle = computed(() => {
   <div class="relative flex min-h-screen h-auto overflow-auto dark:bg-gray-900">
     <div class="flex-1 transition-all" :style="mainContentStyle">
       <a-typography>
-        <a-typography-title class="main-title dark:text-white">Deepfake Demo</a-typography-title>
+        <a-typography-title class="main-title dark:text-white">
+          Demo – {{ selectedModel }}
+        </a-typography-title>
         <div class="tabs-container">
           <a-tabs v-model:active-key="globalActiveKey" lazy-load>
             <a-tab-pane key="1" title="Picture">
@@ -61,6 +63,9 @@ const mainContentStyle = computed(() => {
             </a-tab-pane>
             <a-tab-pane key="3" title="WebCam">
               <TabsWebCam :model="selectedModel" :parameters="currentConfig" />
+            </a-tab-pane>
+            <a-tab-pane v-if="selectedModel === 'DeepFake'" key="4" title="Deepfake Face Detection">
+              <TabsDeepFace :model="selectedModel" :parameters="currentConfig" />
             </a-tab-pane>
           </a-tabs>
         </div>
