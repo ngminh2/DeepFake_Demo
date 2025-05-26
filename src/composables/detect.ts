@@ -5,7 +5,7 @@ import * as msgpack from "@msgpack/msgpack";
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay })
 
-const URL = 'https://862e-42-112-211-165.ngrok-free.app'
+const URL = 'https://4822-42-112-211-165.ngrok-free.app'
 const URL_STATUS = `${URL}/api/status/`
 const URL_RESULT = `${URL}/api/result/`
 const URL_PROCESS = `${URL}/api/process`
